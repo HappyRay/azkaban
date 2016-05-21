@@ -344,6 +344,7 @@ public abstract class AbstractAzkabanServlet extends HttpServlet {
     setErrorMessageInCookie(resp, null);
 
     String warnMsg = getWarnMessageFromCookie(req);
+    warnMsg = "Ray Test Warning";
     page.add("warn_message", warnMsg == null || warnMsg.isEmpty() ? "null"
         : warnMsg);
     setWarnMessageInCookie(resp, null);

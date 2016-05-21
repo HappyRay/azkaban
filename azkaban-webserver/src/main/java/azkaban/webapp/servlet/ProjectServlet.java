@@ -69,6 +69,8 @@ public class ProjectServlet extends LoginAbstractAzkabanServlet {
   protected void handleGet(HttpServletRequest req, HttpServletResponse resp,
       Session session) throws ServletException, IOException {
 
+    logger.info("Starting Azkaban Server");
+
     ProjectManager manager =
         ((AzkabanWebServer) getApplication()).getProjectManager();
 
@@ -85,7 +87,7 @@ public class ProjectServlet extends LoginAbstractAzkabanServlet {
    * ProjectServlet class now handles ajax requests. It returns a
    * @SimplifiedProject object: information regarding projects, and information
    * regarding user and project association
-   * 
+   *
    * @param req
    * @param resp
    * @param session
@@ -119,7 +121,7 @@ public class ProjectServlet extends LoginAbstractAzkabanServlet {
    * If user provides an empty user name, the user defaults to the session user<br>
    * If user does not provide the user param, the user also defaults to the
    * session user<br>
-   * 
+   *
    * @param req
    * @param session
    * @param manager
@@ -151,7 +153,7 @@ public class ProjectServlet extends LoginAbstractAzkabanServlet {
 
   /**
    * A simple helper method that converts a List<Project> to List<SimplifiedProject>
-   * 
+   *
    * @param projects
    * @return
    */
@@ -169,7 +171,7 @@ public class ProjectServlet extends LoginAbstractAzkabanServlet {
 
   /**
    * Renders the user homepage that users see when they log in
-   * 
+   *
    * @param req
    * @param resp
    * @param session
@@ -260,7 +262,7 @@ public class ProjectServlet extends LoginAbstractAzkabanServlet {
    * to end users via REST API. This is done in consideration that the API
    * caller only wants certain project level information regarding a project,
    * but does not want every flow and every job inside that project.
-   * 
+   *
    * @author jyu
    *
    */

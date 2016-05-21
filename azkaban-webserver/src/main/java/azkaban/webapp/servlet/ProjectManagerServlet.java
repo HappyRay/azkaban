@@ -16,37 +16,6 @@
 
 package azkaban.webapp.servlet;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import azkaban.executor.ExecutableFlow;
 import azkaban.executor.ExecutableJobInfo;
 import azkaban.executor.ExecutorManagerAdapter;
@@ -79,6 +48,33 @@ import azkaban.utils.Props;
 import azkaban.utils.PropsUtils;
 import azkaban.utils.Utils;
 import azkaban.webapp.AzkabanWebServer;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
   private static final String APPLICATION_ZIP_MIME_TYPE = "application/zip";
@@ -133,6 +129,8 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
   @Override
   protected void handleGet(HttpServletRequest req, HttpServletResponse resp,
       Session session) throws ServletException, IOException {
+    logger.debug("Ray Get");
+
     if (hasParam(req, "project")) {
       if (hasParam(req, "ajax")) {
         handleAJAXAction(req, resp, session);
@@ -1042,7 +1040,7 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
   /**
    * this only returns user permissions, but not group permissions and proxy
    * users
-   * 
+   *
    * @param project
    * @param ret
    */
