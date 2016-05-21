@@ -10,3 +10,5 @@ repo: "azkaban/azkaban"
 plugins_repo: "azkaban/azkaban-plugins"
 docs: "/"
 home: "http://azkaban.github.io"
+
+exclude: [vendor]
