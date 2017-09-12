@@ -35,8 +35,7 @@ public class ExecutionsTestUtilTest {
 
   @Test
   public void getDataRootDir() throws Exception {
-    final String dataRootDir = ExecutionsTestUtil.getDataRootDir();
-    assertThat(dataRootDir).isEqualTo("../test/execution-test-data/");
+    final String dataRootDir = ExecutionsTestUtil.getDataRootPath();
     final File rootDir = new File(dataRootDir);
     assertThat(rootDir).exists();
   }

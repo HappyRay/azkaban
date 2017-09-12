@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 LinkedIn Corp.
+ * Copyright 2017 LinkedIn Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -60,7 +60,9 @@ public class TestUtils {
   /* Helper method to create an XmlUserManager from XML_FILE_PARAM file */
   public static UserManager createTestXmlUserManager() {
     final Props props = new Props();
-    props.put(XmlUserManager.XML_FILE_PARAM, ExecutionsTestUtil.getDataRootDir()
+    System.out.println(ExecutionsTestUtil.getDataRootPath()
+        + "azkaban-users.xml");
+    props.put(XmlUserManager.XML_FILE_PARAM, ExecutionsTestUtil.getDataRootPath()
         + "azkaban-users.xml");
     final UserManager manager = new XmlUserManager(props);
     return manager;
