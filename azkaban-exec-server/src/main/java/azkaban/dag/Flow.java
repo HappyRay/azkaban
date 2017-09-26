@@ -60,9 +60,10 @@ class Flow {
   }
 
   void kill() {
-    if (this.status.isTerminal()) {
-      // It is possible that a kill is issued after a flow has finished.
-      // Without this check, this method will make duplicate calls to the FlowProcessor.
+    if (this.status.isTerminal() || this.status == Status.KILLING) {
+      // It is possible that a kill is issued after a flow has finished or multiple kill requests
+      // are received. Without this check, this method will make duplicate calls to the
+      // FlowProcessor.
       return;
     }
     changeStatus(Status.KILLING);
