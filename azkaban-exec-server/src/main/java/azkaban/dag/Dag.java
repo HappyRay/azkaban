@@ -136,4 +136,9 @@ class Dag {
   void setStatus(final Status status) {
     this.status = status;
   }
+
+  @VisibleForTesting
+  public List<Node> getNodes() {
+    return this.nodes;
+  }
 }

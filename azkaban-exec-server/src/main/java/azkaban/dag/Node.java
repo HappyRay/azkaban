@@ -195,4 +195,14 @@ class Node {
   String getName() {
     return this.name;
   }
+
+  @VisibleForTesting
+  List<Node> getChildren() {
+    return this.children;
+  }
+
+  @VisibleForTesting
+  List<Node> getParents() {
+    return this.parents;
+  }
 }
