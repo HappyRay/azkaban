@@ -47,11 +47,11 @@ class Node {
     this.nodeProcessor = nodeProcessor;
   }
 
-  public Dag getDag() {
+  Dag getDag() {
     return this.dag;
   }
 
-  public void setDag(final Dag dag) {
+  void setDag(final Dag dag) {
     this.dag = dag;
   }
 
