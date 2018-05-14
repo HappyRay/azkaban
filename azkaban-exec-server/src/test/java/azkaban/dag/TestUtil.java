@@ -25,7 +25,7 @@ class TestUtil {
    *
    * @param name node name
    */
-  static Node createNodeWithNullProcessor(final String name) {
-    return new Node(name, mock(NodeProcessor.class));
+  static Node createNodeWithNullProcessor(final String name, final Dag dag) {
+    return new Node(name, mock(NodeProcessor.class), dag);
   }
 }

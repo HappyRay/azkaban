@@ -16,30 +16,40 @@
 
 package azkaban.dag;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NodeBuilder {
 
   private final String name;
 
-  private final NodeProcessor nodeProcessor;
-
   private final DagBuilder dagBuilder;
 
-  // The nodes that depend on this node.
-  private final List<NodeBuilder> children = new ArrayList<>();
+  private final Node node;
 
-  public NodeBuilder(final String name, final NodeProcessor nodeProcessor,
-      final DagBuilder dagBuilder) {
+  // The nodes that this node depends on
+  private final Set<NodeBuilder> parents = new HashSet<>();
+
+  public NodeBuilder(final String name, final DagBuilder dagBuilder,
+      final Node node) {
     this.name = name;
-    this.nodeProcessor = nodeProcessor;
     this.dagBuilder = dagBuilder;
+    this.node = node;
   }
 
-  private void addChild(final NodeBuilder builder) {
+  /**
+   * Adds the given builder as a parent of this builder.
+   *
+   * <p>If the same builder is added multiple times to this builder, this builder will retain
+   * only one reference to it.</p>
+   */
+  private void addParent(final NodeBuilder builder) {
     checkBuildersBelongToSameDag(builder);
-    this.children.add(builder);
+
+    // Add the relationship to the data structure internal to the builder instead of changing
+    // the associated node directly. This is done to prevent users of this method to change the
+    // structure of the dag after the DagBuilder::build method is called.
+    this.parents.add(builder);
   }
 
   /**
@@ -52,22 +62,42 @@ public class NodeBuilder {
     }
   }
 
-  public void addChildren(final NodeBuilder... builders) {
+  /**
+   * Add builders as parents of this builder.
+   *
+   * <p>This method handles de-duplication of builders.</p>
+   */
+  public void addParents(final NodeBuilder... builders) {
     for (final NodeBuilder builder : builders) {
-      addChild(builder);
+      addParent(builder);
     }
   }
 
-  List<NodeBuilder> getChildren() {
-    return this.children;
+  /**
+   * Add builders as children of this builder.
+   *
+   * <p>This method handles de-duplication of builders.</p>
+   */
+  public void addChildren(final NodeBuilder... builders) {
+    for (final NodeBuilder builder : builders) {
+      builder.addParent(this);
+    }
   }
 
-  Node build() {
-    return new Node(this.name, this.nodeProcessor);
+  Set<NodeBuilder> getParents() {
+    return this.parents;
   }
 
   @Override
   public String toString() {
     return String.format("NodeBuilder (%s) in %s", this.name, this.dagBuilder);
+  }
+
+  String getName() {
+    return this.name;
+  }
+
+  Node getNode() {
+    return this.node;
   }
 }

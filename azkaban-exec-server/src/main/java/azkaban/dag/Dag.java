@@ -39,7 +39,7 @@ class Dag {
   }
 
   void addNode(final Node node) {
-    node.setDag(this);
+    assert (node.getDag() == this);
     this.nodes.add(node);
   }
 

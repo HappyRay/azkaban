@@ -39,35 +39,32 @@ class Node {
 
   private Status status = Status.READY;
 
-  private Dag dag;
+  private final Dag dag;
 
-  Node(final String name, final NodeProcessor nodeProcessor) {
-    this.name = name;
+  Node(final String name, final NodeProcessor nodeProcessor, final Dag dag) {
     requireNonNull(nodeProcessor, "The nodeProcessor parameter can't be null.");
     this.nodeProcessor = nodeProcessor;
+    this.name = name;
+    this.dag = dag;
   }
 
   Dag getDag() {
     return this.dag;
   }
 
-  void setDag(final Dag dag) {
-    this.dag = dag;
-  }
-
-  private void addParent(final Node node) {
+  /**
+   * Adds the node as the current node's parent i.e. the current node depends on the given node.
+   *
+   * <p>It's important NOT to expose this method as public. The design relies on this to ensure
+   * correctness. The DAG's structure shouldn't change after it is created.
+   */
+  void addParent(final Node node) {
     this.parents.add(node);
+    node.addChild(this);
   }
 
-  void addChild(final Node node) {
+  private void addChild(final Node node) {
     this.children.add(node);
-    node.addParent(this);
-  }
-
-  void addChildren(final Node... nodes) {
-    for (final Node node : nodes) {
-      addChild(node);
-    }
   }
 
   boolean hasParent() {

@@ -21,7 +21,8 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.Test;
 
 public class NodeBuilderTest {
@@ -37,21 +38,42 @@ public class NodeBuilderTest {
 
     // when
     this.builder.addChildren(builder2, builder3);
-    final List<NodeBuilder> children = this.builder.getChildren();
+    assertParentMatch(builder2);
+    assertParentMatch(builder3);
+  }
+
+  /**
+   * Asserts that the parent of the given node is the test builder node.
+   */
+  private void assertParentMatch(final NodeBuilder builder) {
+    final Set<NodeBuilder> parents = builder.getParents();
+    assertThat(parents).isEqualTo(new HashSet<>(Arrays.asList(this
+        .builder)));
+  }
+
+  @Test
+  public void addParents() {
+    // given
+    final NodeBuilder builder2 = createBuilder("builder2");
+    final NodeBuilder builder3 = createBuilder("builder3");
+
+    // when
+    this.builder.addParents(builder2, builder3);
+    final Set<NodeBuilder> parents = this.builder.getParents();
 
     // then
-    assertThat(children).isEqualTo(Arrays.asList(builder2, builder3));
+    assertThat(parents).isEqualTo(new HashSet<>(Arrays.asList(builder2, builder3)));
   }
 
   private NodeBuilder createBuilder(final String name) {
-    return new NodeBuilder(name, mock(NodeProcessor.class), this.dagBuilder);
+    return new NodeBuilder(name, this.dagBuilder, mock(Node.class));
   }
 
   @Test
   public void depend_on_node_in_a_different_dag_should_throw_exception() {
     // given
     final NodeBuilder builderInAnotherDag = new NodeBuilder("builder from another dag", mock
-        (NodeProcessor.class), mock(DagBuilder.class));
+        (DagBuilder.class), mock(Node.class));
 
     // when
     final Throwable thrown = catchThrowable(() -> {
@@ -63,21 +85,10 @@ public class NodeBuilderTest {
   }
 
   @Test
-  public void build() {
-    // given
-
-    // when
-    final Node node = this.builder.build();
-
-    // then
-    assertThat(node.getName()).isEqualTo("builder");
-  }
-
-  @Test
   public void toStringTest() {
     // given
     final DagBuilder dagBuilder = new DagBuilder("dag", mock(DagProcessor.class));
-    final NodeBuilder nodeBuilder = new NodeBuilder("node", mock(NodeProcessor.class), dagBuilder);
+    final NodeBuilder nodeBuilder = new NodeBuilder("node", dagBuilder, mock(Node.class));
 
     // when
     final String stringRepresentation = nodeBuilder.toString();
