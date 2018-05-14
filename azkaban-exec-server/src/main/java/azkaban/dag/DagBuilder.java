@@ -88,6 +88,6 @@ public class DagBuilder {
 
   @Override
   public String toString() {
-    return "DagBuilder{name='" + this.name + '\'' + '}';
+    return String.format("DagBuilder (%s)", this.name);
   }
 }

@@ -72,6 +72,6 @@ public class DagBuilderTest {
     final String stringRepresentation = this.dagBuilder.toString();
 
     // then
-    assertThat(stringRepresentation).isEqualTo("DagBuilder{name='dag builder'}");
+    assertThat(stringRepresentation).isEqualTo("DagBuilder (dag builder)");
   }
 }

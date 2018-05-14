@@ -76,11 +76,13 @@ public class NodeBuilderTest {
   @Test
   public void toStringTest() {
     // given
+    final DagBuilder dagBuilder = new DagBuilder("dag", mock(DagProcessor.class));
+    final NodeBuilder nodeBuilder = new NodeBuilder("node", mock(NodeProcessor.class), dagBuilder);
 
     // when
-    final String stringRepresentation = this.builder.toString();
+    final String stringRepresentation = nodeBuilder.toString();
 
     // then
-    assertThat(stringRepresentation).isEqualTo("NodeBuilder {name='builder'}");
+    assertThat(stringRepresentation).isEqualTo("NodeBuilder (node) in DagBuilder (dag)");
   }
 }

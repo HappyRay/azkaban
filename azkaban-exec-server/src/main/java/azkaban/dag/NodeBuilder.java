@@ -68,6 +68,6 @@ public class NodeBuilder {
 
   @Override
   public String toString() {
-    return "NodeBuilder {name='" + this.name + '\'' + '}';
+    return String.format("NodeBuilder (%s) in %s", this.name, this.dagBuilder);
   }
 }
