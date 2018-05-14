@@ -25,16 +25,31 @@ public class NodeBuilder {
 
   private final NodeProcessor nodeProcessor;
 
+  private final DagBuilder dagBuilder;
+
   // The nodes that depend on this node.
   private final List<NodeBuilder> children = new ArrayList<>();
 
-  public NodeBuilder(final String name, final NodeProcessor nodeProcessor) {
+  public NodeBuilder(final String name, final NodeProcessor nodeProcessor,
+      final DagBuilder dagBuilder) {
     this.name = name;
     this.nodeProcessor = nodeProcessor;
+    this.dagBuilder = dagBuilder;
   }
 
   private void addChild(final NodeBuilder builder) {
+    checkBuildersBelongToSameDag(builder);
     this.children.add(builder);
+  }
+
+  /**
+   * Checks if the given NodeBuilder belongs to the same DagBuilder as the current NodeBuilder.
+   */
+  private void checkBuildersBelongToSameDag(final NodeBuilder builder) {
+    if (builder.dagBuilder != this.dagBuilder) {
+      throw new DagException(String.format("Can't add a dependency from %s to %s since they "
+          + "belong to different DagBuilders.", builder, this));
+    }
   }
 
   public void addChildren(final NodeBuilder... builders) {

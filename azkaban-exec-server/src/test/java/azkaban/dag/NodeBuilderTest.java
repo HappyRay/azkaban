@@ -17,6 +17,7 @@
 package azkaban.dag;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
@@ -25,7 +26,8 @@ import org.junit.Test;
 
 public class NodeBuilderTest {
 
-  final NodeBuilder builder = createBuilder("builder");
+  private final DagBuilder dagBuilder = mock(DagBuilder.class);
+  private final NodeBuilder builder = createBuilder("builder");
 
   @Test
   public void addChildren() {
@@ -42,7 +44,22 @@ public class NodeBuilderTest {
   }
 
   private NodeBuilder createBuilder(final String name) {
-    return new NodeBuilder(name, mock(NodeProcessor.class));
+    return new NodeBuilder(name, mock(NodeProcessor.class), this.dagBuilder);
+  }
+
+  @Test
+  public void depend_on_node_in_a_different_dag_should_throw_exception() {
+    // given
+    final NodeBuilder builderInAnotherDag = new NodeBuilder("builder from another dag", mock
+        (NodeProcessor.class), mock(DagBuilder.class));
+
+    // when
+    final Throwable thrown = catchThrowable(() -> {
+      this.builder.addChildren(builderInAnotherDag);
+    });
+
+    // then
+    assertThat(thrown).isInstanceOf(DagException.class);
   }
 
   @Test

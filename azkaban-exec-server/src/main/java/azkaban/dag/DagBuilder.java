@@ -27,9 +27,7 @@ import java.util.Map;
  * <p>Usage:
  *
  * <p>Use the createNode method to create NodeBuilder instances. Call methods on NodeBuilder to
- * connect them. Call build method to build a DAG.
- *
- * <p>Calling build multiple times will result in multiple independent DAGs be returned.
+ * add dependencies among them. Call build method to build a Dag.
  */
 public class DagBuilder {
 
@@ -43,7 +41,7 @@ public class DagBuilder {
   }
 
   public NodeBuilder createNode(final String name, final NodeProcessor nodeProcessor) {
-    final NodeBuilder builder = new NodeBuilder(name, nodeProcessor);
+    final NodeBuilder builder = new NodeBuilder(name, nodeProcessor, this);
     this.builders.add(builder);
     return builder;
   }
@@ -81,11 +79,9 @@ public class DagBuilder {
     final Node node = builderNodeMap.get(builder);
     for (final NodeBuilder childBuilder : builder.getChildren()) {
       final Node childNode = builderNodeMap.get(childBuilder);
-      if (childNode == null) {
-        throw new DagException(
-            String.format("Can't find the node builder (%s) in the Dag builder (%s).",
-                childBuilder, this));
-      }
+
+      // The NodeBuilders should have checked if the NodeBuilders belong to the same DagBuilder.
+      assert (childNode != null);
       node.addChild(childNode);
     }
   }
