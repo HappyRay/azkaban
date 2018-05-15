@@ -44,7 +44,9 @@ class Node {
   Node(final String name, final NodeProcessor nodeProcessor, final Dag dag) {
     requireNonNull(nodeProcessor, "The nodeProcessor parameter can't be null.");
     this.nodeProcessor = nodeProcessor;
+    requireNonNull(name, "The name of the node can't be null");
     this.name = name;
+    requireNonNull(name, "The dag of the node can't be null");
     this.dag = dag;
   }
 

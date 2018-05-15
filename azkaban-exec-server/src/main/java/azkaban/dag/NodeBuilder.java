@@ -16,6 +16,8 @@
 
 package azkaban.dag;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,8 +33,11 @@ public class NodeBuilder {
 
   public NodeBuilder(final String name, final NodeProcessor nodeProcessor,
       final DagBuilder dagBuilder) {
+    requireNonNull(name, "The name of the NodeBuilder can't be null");
     this.name = name;
+    requireNonNull(nodeProcessor, "The nodeProcessor of the NodeBuilder can't be null");
     this.nodeProcessor = nodeProcessor;
+    requireNonNull(dagBuilder, "The dagBuilder of the NodeBuilder can't be null");
     this.dagBuilder = dagBuilder;
   }
 
