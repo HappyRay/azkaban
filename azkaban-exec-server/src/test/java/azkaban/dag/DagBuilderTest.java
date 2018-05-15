@@ -26,7 +26,6 @@ import org.junit.Test;
 public class DagBuilderTest {
 
   private final DagBuilder dagBuilder = new DagBuilder("dag builder", mock(DagProcessor.class));
-  private final NodeProcessor nodeProcessor = mock(NodeProcessor.class);
 
   @Test
   public void build_should_return_expected_dag() {
@@ -61,7 +60,7 @@ public class DagBuilderTest {
   }
 
   private NodeBuilder createNodeBuilder(final String name) {
-    return this.dagBuilder.createNode(name, this.nodeProcessor);
+    return this.dagBuilder.createNode(name, mock(NodeProcessor.class));
   }
 
   @Test
