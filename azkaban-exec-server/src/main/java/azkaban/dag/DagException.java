@@ -19,5 +19,6 @@ package azkaban.dag;
 public class DagException extends RuntimeException {
 
   public DagException(final String message) {
+    super(message);
   }
 }
