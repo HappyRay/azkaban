@@ -17,6 +17,7 @@
 package azkaban.dag;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
@@ -26,6 +27,21 @@ import org.junit.Test;
 public class DagBuilderTest {
 
   private final DagBuilder dagBuilder = new DagBuilder("dag builder", mock(DagProcessor.class));
+
+  @Test
+  public void create_nodes_with_same_name_should_throw_an_exception() {
+    final String name = "nb";
+    // given
+    final NodeBuilder nodeBuilder1 = createNodeBuilder(name);
+
+    // when
+    final Throwable thrown = catchThrowable(() -> {
+      createNodeBuilder(name);
+    });
+
+    // then
+    assertThat(thrown).isInstanceOf(DagException.class);
+  }
 
   @Test
   public void build_should_return_expected_dag() {
@@ -66,13 +82,13 @@ public class DagBuilderTest {
   @Test
   public void add_dependency_should_not_affect_dag_already_built() {
     // given
-    Dag dag = this.dagBuilder.build();
+    final Dag dag = this.dagBuilder.build();
 
     // when
     createNodeBuilder("a");
 
     // then
-    List<Node> nodes = dag.getNodes();
+    final List<Node> nodes = dag.getNodes();
     assertThat(nodes).hasSize(0);
   }
 
