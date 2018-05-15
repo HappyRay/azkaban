@@ -70,6 +70,8 @@ public class NodeBuilder {
    * Add builders as parents of this builder.
    *
    * <p>This method handles de-duplication of builders.</p>
+   *
+   * @throws DagException if builders are not created from the same DagBuilder
    */
   public void addParents(final NodeBuilder... builders) {
     for (final NodeBuilder builder : builders) {
@@ -81,6 +83,8 @@ public class NodeBuilder {
    * Add builders as children of this builder.
    *
    * <p>This method handles de-duplication of builders.</p>
+   *
+   * @throws DagException if builders are not created from the same DagBuilder
    */
   public void addChildren(final NodeBuilder... builders) {
     for (final NodeBuilder builder : builders) {
