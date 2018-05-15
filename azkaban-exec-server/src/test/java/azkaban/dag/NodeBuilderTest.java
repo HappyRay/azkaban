@@ -66,14 +66,15 @@ public class NodeBuilderTest {
   }
 
   private NodeBuilder createBuilder(final String name) {
-    return new NodeBuilder(name, this.dagBuilder, mock(Node.class));
+    return new NodeBuilder(name, mock(NodeProcessor.class), this.dagBuilder);
   }
 
   @Test
   public void depend_on_node_in_a_different_dag_should_throw_exception() {
     // given
     final NodeBuilder builderInAnotherDag = new NodeBuilder("builder from another dag", mock
-        (DagBuilder.class), mock(Node.class));
+        (NodeProcessor.class), mock
+        (DagBuilder.class));
 
     // when
     final Throwable thrown = catchThrowable(() -> {
@@ -88,7 +89,8 @@ public class NodeBuilderTest {
   public void toStringTest() {
     // given
     final DagBuilder dagBuilder = new DagBuilder("dag", mock(DagProcessor.class));
-    final NodeBuilder nodeBuilder = new NodeBuilder("node", dagBuilder, mock(Node.class));
+    final NodeBuilder nodeBuilder = new NodeBuilder("node", mock(NodeProcessor.class),
+        dagBuilder);
 
     // when
     final String stringRepresentation = nodeBuilder.toString();

@@ -20,7 +20,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A DAG (Directed acyclic graph) consists of {@link Node}s.
@@ -30,6 +32,7 @@ class Dag {
   private final String name;
   private final DagProcessor dagProcessor;
   private final List<Node> nodes = new ArrayList<>();
+  private final Map<String, Node> nameToNodeMap = new HashMap<>();
   private Status status = Status.READY;
 
   Dag(final String name, final DagProcessor dagProcessor) {
@@ -41,6 +44,18 @@ class Dag {
   void addNode(final Node node) {
     assert (node.getDag() == this);
     this.nodes.add(node);
+    assert (!nameToNodeMap.containsKey(node.getName()));
+    nameToNodeMap.put(node.getName(), node);
+  }
+
+  /**
+   * Gets the node associated with the name.
+   *
+   * @param name node name
+   * @return node. null if the node with this name doesn't exist
+   */
+  Node getNodeByName(String name) {
+    return nameToNodeMap.get(name);
   }
 
   void start() {

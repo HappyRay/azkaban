@@ -22,19 +22,18 @@ import java.util.Set;
 public class NodeBuilder {
 
   private final String name;
+  private final NodeProcessor nodeProcessor;
 
   private final DagBuilder dagBuilder;
-
-  private final Node node;
 
   // The nodes that this node depends on
   private final Set<NodeBuilder> parents = new HashSet<>();
 
-  public NodeBuilder(final String name, final DagBuilder dagBuilder,
-      final Node node) {
+  public NodeBuilder(final String name, final NodeProcessor nodeProcessor,
+      final DagBuilder dagBuilder) {
     this.name = name;
+    this.nodeProcessor = nodeProcessor;
     this.dagBuilder = dagBuilder;
-    this.node = node;
   }
 
   /**
@@ -97,7 +96,15 @@ public class NodeBuilder {
     return this.name;
   }
 
-  Node getNode() {
-    return this.node;
+  /**
+   * Builds a Node and adds it to the given Dag.
+   *
+   * @param dag Dag to associate this node with
+   * @return a node
+   */
+  public Node build(final Dag dag) {
+    final Node node = new Node(this.name, this.nodeProcessor, dag);
+    dag.addNode(node);
+    return node;
   }
 }

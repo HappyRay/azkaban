@@ -67,7 +67,7 @@ public class DagServiceTest {
     addToExpectedSequence("a", Status.SUCCESS);
     addToExpectedSequence("fa", Status.SUCCESS);
 
-    runAndVerify();
+    buildDagRunAndVerify();
   }
 
   /**
@@ -88,7 +88,7 @@ public class DagServiceTest {
     addToExpectedSequence("b", Status.SUCCESS);
     addToExpectedSequence("fa", Status.SUCCESS);
 
-    runAndVerify();
+    buildDagRunAndVerify();
   }
 
   /**
@@ -115,7 +115,7 @@ public class DagServiceTest {
     addToExpectedSequence("c", Status.SUCCESS);
     addToExpectedSequence("fa", Status.SUCCESS);
 
-    runAndVerify();
+    buildDagRunAndVerify();
 
   }
 
@@ -131,7 +131,7 @@ public class DagServiceTest {
     addToExpectedSequence("a", Status.FAILURE);
     addToExpectedSequence("fa", Status.FAILURE);
 
-    runAndVerify();
+    buildDagRunAndVerify();
   }
 
   /**
@@ -156,7 +156,7 @@ public class DagServiceTest {
     addToExpectedSequence("b", Status.CANCELED);
     addToExpectedSequence("fa", Status.FAILURE);
 
-    runAndVerify();
+    buildDagRunAndVerify();
   }
 
   /**
@@ -188,7 +188,7 @@ public class DagServiceTest {
     addToExpectedSequence("c", Status.SUCCESS);
     addToExpectedSequence("fa", Status.FAILURE);
 
-    runAndVerify();
+    buildDagRunAndVerify();
 
   }
 
@@ -217,10 +217,12 @@ public class DagServiceTest {
         (this.dagService, this.statusChangeRecorder, bDag);
     final NodeBuilder subDagNodeBuilder = this.dagBuilder
         .createNode("sfb", testSubDagNodeProcessor);
-    testSubDagProcessor.setNode(subDagNodeBuilder.getNode());
 
     final NodeBuilder cBuilder = createNodeInTestDag("c");
     cBuilder.addParents(subDagNodeBuilder);
+    final Dag dag = this.dagBuilder.build();
+
+    testSubDagProcessor.setNode(dag.getNodeByName(subDagNodeBuilder.getName()));
 
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("sfb", Status.RUNNING);
@@ -235,7 +237,7 @@ public class DagServiceTest {
     addToExpectedSequence("c", Status.SUCCESS);
     addToExpectedSequence("fa", Status.SUCCESS);
 
-    runAndVerify();
+    runAndVerify(dag);
 
   }
 
@@ -277,8 +279,7 @@ public class DagServiceTest {
     this.expectedSequence.add(new Pair<>(name, status));
   }
 
-  private void runDag() throws InterruptedException {
-    final Dag dag = this.dagBuilder.build();
+  private void runDag(final Dag dag) throws InterruptedException {
     this.dagService.startDag(dag);
     final boolean isWaitSuccessful = this.dagFinishedLatch.await(2, TimeUnit.SECONDS);
 
@@ -290,8 +291,13 @@ public class DagServiceTest {
     this.statusChangeRecorder.verifySequence(this.expectedSequence);
   }
 
-  private void runAndVerify() throws InterruptedException {
-    runDag();
+  private void buildDagRunAndVerify() throws InterruptedException {
+    final Dag dag = this.dagBuilder.build();
+    runAndVerify(dag);
+  }
+
+  private void runAndVerify(final Dag dag) throws InterruptedException {
+    runDag(dag);
     verifyStatusSequence();
   }
 

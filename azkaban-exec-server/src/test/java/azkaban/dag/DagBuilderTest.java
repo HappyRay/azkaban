@@ -64,6 +64,19 @@ public class DagBuilderTest {
   }
 
   @Test
+  public void add_dependency_should_not_affect_dag_already_built() {
+    // given
+    Dag dag = this.dagBuilder.build();
+
+    // when
+    createNodeBuilder("a");
+
+    // then
+    List<Node> nodes = dag.getNodes();
+    assertThat(nodes).hasSize(0);
+  }
+
+  @Test
   public void test_toString() {
     // given
 

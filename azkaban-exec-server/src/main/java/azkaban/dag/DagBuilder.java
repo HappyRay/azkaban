@@ -17,7 +17,11 @@
 package azkaban.dag;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A builder to build DAGs.
@@ -30,22 +34,26 @@ import java.util.List;
 public class DagBuilder {
 
   private final String name;
-  private final List<NodeBuilder> builders = new ArrayList<>();
-  private final Dag dag;
+  private final DagProcessor dagProcessor;
 
-  // True if the final dag has been finalized.
-  private boolean isDagFinalized;
+  private final List<NodeBuilder> builders = new ArrayList<>();
+  private final Set<String> nodeNamesSet = new HashSet<>();
+
 
   public DagBuilder(final String name, final DagProcessor dagProcessor) {
     this.name = name;
-    this.dag = new Dag(name, dagProcessor);
+    this.dagProcessor = dagProcessor;
   }
 
   public NodeBuilder createNode(final String name, final NodeProcessor nodeProcessor) {
-    final Node node = new Node(name, nodeProcessor, this.dag);
-    this.dag.addNode(node);
-    final NodeBuilder builder = new NodeBuilder(name, this, node);
+    final NodeBuilder builder = new NodeBuilder(name, nodeProcessor, this);
     this.builders.add(builder);
+    if (this.nodeNamesSet.contains(name)) {
+      throw new DagException(String.format("Node names in a DAG need to be unique. The name (%s) "
+          + "already exists.", name));
+    }
+    this.nodeNamesSet.add(name);
+
     return builder;
   }
 
@@ -53,35 +61,53 @@ public class DagBuilder {
    * Builds the dag.
    *
    * <p>Once this method is called, subsequent calls via NodeBuilder to modify the nodes's
-   * relationships in the dag will have no effect on the returned Dag object. Multiple calls to this
-   * method will return the same Dag object.
+   * relationships in the dag will have no effect on the returned Dag object.
    * </p>
    *
-   * @return the finalized Dag
+   * @return the Dag reflecting the current state of the DagBuilder
    */
   public Dag build() {
-    if (!this.isDagFinalized) {
-      updateNodesRelationships();
-      this.isDagFinalized = true;
-    }
-    return this.dag;
+    final Dag dag = new Dag(this.name, this.dagProcessor);
+    final Map<NodeBuilder, Node> builderNodeMap = createBuilderToNodeMap(dag);
+    updateNodesRelationships(builderNodeMap);
+    return dag;
   }
 
-  private void updateNodesRelationships() {
+  /**
+   * Creates nodes using information stored in the current list of builders.
+   *
+   * <p>New nodes are created here to ensure they don't change even if their corresponding
+   * NodeBuilders are modified after the {@link DagBuilder#build()} is called.
+   *
+   * @param dag the dag to associate the nodes with
+   * @return the map from NodeBuilder to Node
+   */
+  private Map<NodeBuilder, Node> createBuilderToNodeMap(final Dag dag) {
+    final Map<NodeBuilder, Node> builderNodeMap = new HashMap<>();
     for (final NodeBuilder builder : this.builders) {
-      addParentNodes(builder);
+      final Node node = builder.build(dag);
+      builderNodeMap.put(builder, node);
+    }
+    return builderNodeMap;
+  }
+
+  private void updateNodesRelationships(final Map<NodeBuilder, Node> builderNodeMap) {
+    for (final NodeBuilder builder : this.builders) {
+      addParentNodes(builder, builderNodeMap);
     }
   }
 
   /**
    * Adds parent nodes to the node associated with the builder.
    */
-  private void addParentNodes(final NodeBuilder builder) {
-    final Node node = builder.getNode();
+  private void addParentNodes(final NodeBuilder builder,
+      final Map<NodeBuilder, Node> builderToNodeMap) {
+    final Node node = builderToNodeMap.get(builder);
     for (final NodeBuilder parentBuilder : builder.getParents()) {
-      final Node parentNode = parentBuilder.getNode();
+      final Node parentNode = builderToNodeMap.get(parentBuilder);
 
       // The NodeBuilders should have checked if the NodeBuilders belong to the same DagBuilder.
+      assert (parentNode != null);
       node.addParent(parentNode);
     }
   }
