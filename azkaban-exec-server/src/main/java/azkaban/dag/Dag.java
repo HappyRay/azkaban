@@ -26,6 +26,9 @@ import java.util.Map;
 
 /**
  * A DAG (Directed acyclic graph) consists of {@link Node}s.
+ *
+ * <p>Most of the methods in this class should remain package private. Code outside of this
+ * package should mainly interact with the {@link DagService}.
  */
 class Dag {
 
@@ -42,11 +45,19 @@ class Dag {
     this.dagProcessor = dagProcessor;
   }
 
+  /**
+   * Adds a node to the current dag.
+   *
+   * <p>It's important NOT to expose this method as public. The design relies on this to ensure
+   * correctness. The DAG's structure shouldn't change after it is created.
+   *
+   * @param node a node to add
+   */
   void addNode(final Node node) {
     assert (node.getDag() == this);
     this.nodes.add(node);
-    assert (!nameToNodeMap.containsKey(node.getName()));
-    nameToNodeMap.put(node.getName(), node);
+    assert (!this.nameToNodeMap.containsKey(node.getName()));
+    this.nameToNodeMap.put(node.getName(), node);
   }
 
   /**
@@ -55,8 +66,8 @@ class Dag {
    * @param name node name
    * @return node. null if the node with this name doesn't exist
    */
-  Node getNodeByName(String name) {
-    return nameToNodeMap.get(name);
+  Node getNodeByName(final String name) {
+    return this.nameToNodeMap.get(name);
   }
 
   void start() {

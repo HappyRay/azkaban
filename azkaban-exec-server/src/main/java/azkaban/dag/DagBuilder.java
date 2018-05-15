@@ -26,10 +26,9 @@ import java.util.Set;
 /**
  * A builder to build DAGs.
  *
- * <p>Usage:
- *
- * <p>Use the createNode method to create NodeBuilder instances. Call methods on NodeBuilder to
- * add dependencies among them. Call build method to build a Dag.
+ * <p>Use the {@link DagBuilder#createNode} method to create NodeBuilder instances. Call
+ * methods on NodeBuilder to add dependencies among them. Call the {@link DagBuilder#build()} method
+ * to build a Dag.
  */
 public class DagBuilder {
 
@@ -38,7 +37,6 @@ public class DagBuilder {
 
   private final List<NodeBuilder> builders = new ArrayList<>();
   private final Set<String> nodeNamesSet = new HashSet<>();
-
 
   public DagBuilder(final String name, final DagProcessor dagProcessor) {
     this.name = name;
@@ -49,8 +47,8 @@ public class DagBuilder {
     final NodeBuilder builder = new NodeBuilder(name, nodeProcessor, this);
     this.builders.add(builder);
     if (this.nodeNamesSet.contains(name)) {
-      throw new DagException(String.format("Node names in a DAG need to be unique. The name (%s) "
-          + "already exists.", name));
+      throw new DagException(String.format("Node names in a DAG %s need to be unique. The name "
+          + "(%s) already exists.", this, name));
     }
     this.nodeNamesSet.add(name);
 
