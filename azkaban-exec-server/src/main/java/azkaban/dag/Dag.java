@@ -36,6 +36,7 @@ class Dag {
   private Status status = Status.READY;
 
   Dag(final String name, final DagProcessor dagProcessor) {
+    requireNonNull(name, "The name of the Dag can't be null");
     this.name = name;
     requireNonNull(dagProcessor, "The dagProcessor parameter can't be null.");
     this.dagProcessor = dagProcessor;
