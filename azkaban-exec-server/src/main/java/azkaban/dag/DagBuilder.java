@@ -70,6 +70,7 @@ public class DagBuilder {
     final Dag dag = new Dag(this.name, this.dagProcessor);
     final Map<NodeBuilder, Node> builderNodeMap = createBuilderToNodeMap(dag);
     updateNodesRelationships(builderNodeMap);
+    // todo HappyRay: circular dependency detection.
     return dag;
   }
 
