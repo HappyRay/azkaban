@@ -1,0 +1,5 @@
+nodes:
+  - name: shell_echo
+    type: command
+    config:
+      command: echo "Hello World."

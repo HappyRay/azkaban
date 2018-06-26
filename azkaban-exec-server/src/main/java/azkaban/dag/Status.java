@@ -18,7 +18,7 @@ package azkaban.dag;
 
 import com.google.common.collect.ImmutableSet;
 
-enum Status {
+public enum Status {
   READY, // ready to run
   DISABLED, // disabled by users. Treat as the node has the status of success
   BLOCKED, // temporarily blocked. Need to be unblocked by another external event

@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Node in a DAG: Directed acyclic graph.
  */
-class Node {
+public class Node {
 
   private final String name;
 
