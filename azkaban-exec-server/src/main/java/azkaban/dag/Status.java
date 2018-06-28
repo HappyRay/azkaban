@@ -35,7 +35,7 @@ public enum Status {
   static final ImmutableSet<Status> TERMINAL_STATES = ImmutableSet.of(DISABLED, SUCCESS, FAILURE,
       CANCELED, KILLED);
 
-  boolean isTerminal() {
+  public boolean isTerminal() {
     return TERMINAL_STATES.contains(this);
   }
 

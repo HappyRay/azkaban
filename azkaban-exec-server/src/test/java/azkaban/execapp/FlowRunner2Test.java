@@ -28,6 +28,9 @@ import azkaban.project.NodeBean;
 import azkaban.project.NodeBeanLoader;
 import azkaban.utils.ExecutorServiceUtils;
 import java.io.File;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 /**
@@ -35,15 +38,18 @@ import org.junit.Test;
  */
 public class FlowRunner2Test {
 
+  private final DagService dagService = new DagService(new ExecutorServiceUtils());
+  private final CountDownLatch flowFinishedLatch = new CountDownLatch(1);
+
   @Test
   public void runSimpleV2Flow() throws Exception {
     final File flowFile = loadFlowFileFromResource();
     final NodeBeanLoader beanLoader = new NodeBeanLoader();
     final NodeBean nodeBean = beanLoader.load(flowFile);
     final Dag dag = createDag(nodeBean);
-    final DagService dagService = new DagService(new ExecutorServiceUtils());
-    dagService.startDag(dag);
-    dagService.shutdownAndAwaitTermination();
+    this.dagService.startDag(dag);
+    this.flowFinishedLatch.await(2, TimeUnit.SECONDS);
+    this.dagService.shutdownAndAwaitTermination();
   }
 
   private Dag createDag(final NodeBean nodeBean) {
@@ -64,7 +70,7 @@ public class FlowRunner2Test {
 
   private void addNode(final DagBuilder builder, final NodeBean node) {
     final String nodeName = node.getName();
-    final SimpleNodeProcessor nodeProcessor = new SimpleNodeProcessor();
+    final SimpleNodeProcessor nodeProcessor = new SimpleNodeProcessor(nodeName, node.getConfig());
     final NodeBuilder nodeBuilder = builder.createNode(nodeName, nodeProcessor);
   }
 
@@ -73,21 +79,35 @@ public class FlowRunner2Test {
     return new File(loader.getResource("hello_world_flow.flow").getFile());
   }
 
-  static class SimpleDagProcessor implements DagProcessor {
+  class SimpleDagProcessor implements DagProcessor {
 
     @Override
     public void changeStatus(final Dag dag, final Status status) {
       System.out.println(dag + " status changed to " + status);
+      if (status.isTerminal()) {
+        FlowRunner2Test.this.flowFinishedLatch.countDown();
+      }
     }
   }
 
-  static class SimpleNodeProcessor implements NodeProcessor {
+  class SimpleNodeProcessor implements NodeProcessor {
+
+    private final String name;
+    private final Map<String, String> config;
+
+    SimpleNodeProcessor(final String name, final Map<String, String> config) {
+      this.name = name;
+      this.config = config;
+    }
 
     @Override
     public void changeStatus(final Node node, final Status status) {
       System.out.println(node + " status changed to " + status);
+      switch (status) {
+        case RUNNING:
+          System.out.println(String.format("Running with config: %s", this.config));
+          FlowRunner2Test.this.dagService.markNodeSuccess(node);
+      }
     }
   }
-
-
 }
