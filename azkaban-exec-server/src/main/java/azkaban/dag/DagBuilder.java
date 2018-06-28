@@ -40,6 +40,7 @@ public class DagBuilder {
 
   private final List<NodeBuilder> builders = new ArrayList<>();
   private final Set<String> nodeNamesSet = new HashSet<>();
+  private final Map<String, NodeBuilder> nameToBuilderMap = new HashMap<>();
 
   public DagBuilder(final String name, final DagProcessor dagProcessor) {
     requireNonNull(name, "The name of the DagBuilder can't be null");
@@ -64,8 +65,39 @@ public class DagBuilder {
     final NodeBuilder builder = new NodeBuilder(name, nodeProcessor, this);
     this.builders.add(builder);
     this.nodeNamesSet.add(name);
+    this.nameToBuilderMap.put(name, builder);
 
     return builder;
+  }
+
+  /**
+   * Add parent nodes to a child node. All the names should have been registered with this builder
+   * with the {@link DagBuilder#createNode(String, NodeProcessor)} call.
+   *
+   * @param childNodeName name of the child node
+   * @param parentNodeNames name of the nodes that are parent nodes of the target node
+   */
+  public void addParentNodes(final String childNodeName, final List<String> parentNodeNames) {
+    if (parentNodeNames == null) {
+      return;
+    }
+    final NodeBuilder child = this.nameToBuilderMap.get(childNodeName);
+    if (child == null) {
+      throw new DagException(String.format("Unknown child node (%s). Did you create the node?",
+          childNodeName));
+    }
+    for (final String parentName : parentNodeNames) {
+      addParentNode(child, parentName);
+    }
+  }
+
+  private void addParentNode(final NodeBuilder child, final String parentName) {
+    final NodeBuilder parent = this.nameToBuilderMap.get(parentName);
+    if (parent == null) {
+      throw new DagException(
+          String.format("Unknown parent node (%s). Did you create the node?", parentName));
+    }
+    child.addParents(parent);
   }
 
   /**

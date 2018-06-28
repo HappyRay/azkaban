@@ -21,13 +21,13 @@ import azkaban.dag.DagBuilder;
 import azkaban.dag.DagProcessor;
 import azkaban.dag.DagService;
 import azkaban.dag.Node;
-import azkaban.dag.NodeBuilder;
 import azkaban.dag.NodeProcessor;
 import azkaban.dag.Status;
 import azkaban.project.NodeBean;
 import azkaban.project.NodeBeanLoader;
 import azkaban.utils.ExecutorServiceUtils;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -56,22 +56,34 @@ public class FlowRunner2Test {
     final String flowName = nodeBean.getName();
     final SimpleDagProcessor dagProcessor = new SimpleDagProcessor();
     final DagBuilder builder = new DagBuilder(flowName, dagProcessor);
-    addNodes(builder, nodeBean);
-    // todo: add node dependencies.
+    createNodes(builder, nodeBean);
+    linkNodes(builder, nodeBean);
     return builder.build();
 
   }
 
-  private void addNodes(final DagBuilder builder, final NodeBean nodeBean) {
+  private void linkNodes(final DagBuilder builder, final NodeBean nodeBean) {
     for (final NodeBean node : nodeBean.getNodes()) {
-      addNode(builder, node);
+      linkNode(builder, node);
     }
   }
 
-  private void addNode(final DagBuilder builder, final NodeBean node) {
+  private void linkNode(final DagBuilder builder, final NodeBean node) {
+    final String name = node.getName();
+    final List<String> parents = node.getDependsOn();
+    builder.addParentNodes(name, parents);
+  }
+
+  private void createNodes(final DagBuilder builder, final NodeBean nodeBean) {
+    for (final NodeBean node : nodeBean.getNodes()) {
+      createNode(builder, node);
+    }
+  }
+
+  private void createNode(final DagBuilder builder, final NodeBean node) {
     final String nodeName = node.getName();
     final SimpleNodeProcessor nodeProcessor = new SimpleNodeProcessor(nodeName, node.getConfig());
-    final NodeBuilder nodeBuilder = builder.createNode(nodeName, nodeProcessor);
+    builder.createNode(nodeName, nodeProcessor);
   }
 
   private File loadFlowFileFromResource() {
