@@ -43,47 +43,66 @@ public class FlowRunner2Test {
 
   @Test
   public void runSimpleV2Flow() throws Exception {
-    final File flowFile = loadFlowFileFromResource();
-    final NodeBeanLoader beanLoader = new NodeBeanLoader();
-    final NodeBean nodeBean = beanLoader.load(flowFile);
-    final Dag dag = createDag(nodeBean);
+    final NodeBean flowNode = loadFlowNode();
+    final Dag dag = createDag(flowNode);
     this.dagService.startDag(dag);
     this.flowFinishedLatch.await(2, TimeUnit.SECONDS);
     this.dagService.shutdownAndAwaitTermination();
   }
 
-  private Dag createDag(final NodeBean nodeBean) {
-    final String flowName = nodeBean.getName();
-    final SimpleDagProcessor dagProcessor = new SimpleDagProcessor();
-    final DagBuilder builder = new DagBuilder(flowName, dagProcessor);
-    createNodes(builder, nodeBean);
-    linkNodes(builder, nodeBean);
-    return builder.build();
+  private NodeBean loadFlowNode() throws Exception {
+    final File flowFile = loadFlowFileFromResource();
+    final NodeBeanLoader beanLoader = new NodeBeanLoader();
+    return beanLoader.load(flowFile);
+  }
+
+  private Dag createDag(final NodeBean flowNode) {
+    final DagCreator creator = new DagCreator(flowNode);
+    return creator.create();
 
   }
 
-  private void linkNodes(final DagBuilder builder, final NodeBean nodeBean) {
-    for (final NodeBean node : nodeBean.getNodes()) {
-      linkNode(builder, node);
+  private class DagCreator {
+
+    private final NodeBean flowNode;
+    private final DagBuilder dagBuilder;
+
+    DagCreator(final NodeBean flowNode) {
+      final String flowName = flowNode.getName();
+      this.flowNode = flowNode;
+      this.dagBuilder = new DagBuilder(flowName, new SimpleDagProcessor());
     }
-  }
 
-  private void linkNode(final DagBuilder builder, final NodeBean node) {
-    final String name = node.getName();
-    final List<String> parents = node.getDependsOn();
-    builder.addParentNodes(name, parents);
-  }
-
-  private void createNodes(final DagBuilder builder, final NodeBean nodeBean) {
-    for (final NodeBean node : nodeBean.getNodes()) {
-      createNode(builder, node);
+    Dag create() {
+      createNodes();
+      linkNodes();
+      return this.dagBuilder.build();
     }
-  }
 
-  private void createNode(final DagBuilder builder, final NodeBean node) {
-    final String nodeName = node.getName();
-    final SimpleNodeProcessor nodeProcessor = new SimpleNodeProcessor(nodeName, node.getConfig());
-    builder.createNode(nodeName, nodeProcessor);
+    private void createNodes() {
+      for (final NodeBean node : this.flowNode.getNodes()) {
+        createNode(node);
+      }
+    }
+
+    private void createNode(final NodeBean node) {
+      final String nodeName = node.getName();
+      final SimpleNodeProcessor nodeProcessor = new SimpleNodeProcessor(nodeName, node.getConfig());
+      this.dagBuilder.createNode(nodeName, nodeProcessor);
+    }
+
+    private void linkNodes() {
+      for (final NodeBean node : this.flowNode.getNodes()) {
+        linkNode(node);
+      }
+    }
+
+    private void linkNode(final NodeBean node) {
+      final String name = node.getName();
+      final List<String> parents = node.getDependsOn();
+      this.dagBuilder.addParentNodes(name, parents);
+    }
+
   }
 
   private File loadFlowFileFromResource() {
