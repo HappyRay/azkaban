@@ -53,7 +53,6 @@ public class DagServiceTest {
   private final DagProcessor dagProcessor = new TestDagProcessor(this.dagFinishedLatch,
       this.statusChangeRecorder);
   private final DagBuilder dagBuilder = new DagBuilder("fa", this.dagProcessor);
-  private final DagBuilderHelper dagBuilderHelper = new DagBuilderHelper(this.dagBuilder);
   private final List<Pair<String, Status>> expectedSequence = new ArrayList<>();
 
 
@@ -230,9 +229,8 @@ public class DagServiceTest {
     final TestSubDagProcessor testSubDagProcessor = new TestSubDagProcessor
         (this.dagService, this.statusChangeRecorder);
     final DagBuilder subDagBuilder = new DagBuilder("fb", testSubDagProcessor);
-    final DagBuilderHelper subDagBuilderHelper = new DagBuilderHelper(subDagBuilder);
-    subDagBuilderHelper.createNode("a");
-    subDagBuilderHelper.createNode("b");
+    subDagBuilder.createNode("a", this.nodeProcessor);
+    subDagBuilder.createNode("b", this.nodeProcessor);
     final Dag bDag = subDagBuilder.build();
 
     final TestSubDagNodeProcessor testSubDagNodeProcessor = new TestSubDagNodeProcessor
@@ -259,20 +257,6 @@ public class DagServiceTest {
     addToExpectedSequence("fa", Status.SUCCESS);
 
     runAndVerify(dag);
-
-  }
-
-  private class DagBuilderHelper {
-
-    private final DagBuilder dagBuilder;
-
-    DagBuilderHelper(final DagBuilder dagBuilder) {
-      this.dagBuilder = dagBuilder;
-    }
-
-    void createNode(final String name) {
-      this.dagBuilder.createNode(name, DagServiceTest.this.nodeProcessor);
-    }
 
   }
 
@@ -336,7 +320,7 @@ public class DagServiceTest {
    * Creates a node and add to the test dag.
    */
   private void createNodeInTestDag(final String name) {
-    this.dagBuilderHelper.createNode(name);
+    this.dagBuilder.createNode(name, this.nodeProcessor);
   }
 }
 
