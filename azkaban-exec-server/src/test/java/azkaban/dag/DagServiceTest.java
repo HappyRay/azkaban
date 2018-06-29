@@ -100,7 +100,7 @@ public class DagServiceTest {
   public void twoNodesSuccess() throws Exception {
     createNodeInTestDag("a");
     createNodeInTestDag("b");
-    this.dagBuilderHelper.addParentNode("b", "a");
+    this.dagBuilder.addParentNode("b", "a");
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
     addToExpectedSequence("a", Status.SUCCESS);
@@ -124,8 +124,8 @@ public class DagServiceTest {
     createNodeInTestDag("a");
     createNodeInTestDag("b");
     createNodeInTestDag("c");
-    this.dagBuilderHelper.addParentNode("b", "a");
-    this.dagBuilderHelper.addParentNode("c", "a");
+    this.dagBuilder.addParentNode("b", "a");
+    this.dagBuilder.addParentNode("c", "a");
 
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
@@ -168,7 +168,7 @@ public class DagServiceTest {
   public void twoNodesFailFirst() throws Exception {
     createNodeInTestDag("a");
     createNodeInTestDag("b");
-    this.dagBuilderHelper.addParentNode("b", "a");
+    this.dagBuilder.addParentNode("b", "a");
     this.nodesToFail.add("a");
 
     addToExpectedSequence("fa", Status.RUNNING);
@@ -196,8 +196,8 @@ public class DagServiceTest {
     createNodeInTestDag("a");
     createNodeInTestDag("b");
     createNodeInTestDag("c");
-    this.dagBuilderHelper.addParentNode("b", "a");
-    this.dagBuilderHelper.addParentNode("c", "a");
+    this.dagBuilder.addParentNode("b", "a");
+    this.dagBuilder.addParentNode("c", "a");
     this.nodesToFail.add("b");
 
     addToExpectedSequence("fa", Status.RUNNING);
@@ -242,7 +242,7 @@ public class DagServiceTest {
 
     createNodeInTestDag("c");
 
-    this.dagBuilderHelper.addParentNode("c", SUB_DAG_NAME);
+    this.dagBuilder.addParentNode("c", SUB_DAG_NAME);
     final Dag dag = this.dagBuilder.build();
 
     addToExpectedSequence("fa", Status.RUNNING);
@@ -272,13 +272,6 @@ public class DagServiceTest {
 
     void createNode(final String name) {
       this.dagBuilder.createNode(name, DagServiceTest.this.nodeProcessor);
-    }
-
-    /**
-     * Adds parent as the child's parent node.
-     */
-    private void addParentNode(final String childName, final String parentName) {
-      this.dagBuilder.addParentNode(childName, parentName);
     }
 
   }
