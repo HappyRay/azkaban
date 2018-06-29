@@ -48,6 +48,7 @@ public class Node {
     this.name = name;
     requireNonNull(dag, "The dag of the node can't be null");
     this.dag = dag;
+    dag.addNode(this);
   }
 
   Dag getDag() {

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import azkaban.utils.ExecutorServiceUtils;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,7 @@ public class DagServiceTest {
   private final DagProcessor dagProcessor = new TestDagProcessor(this.dagFinishedLatch,
       this.statusChangeRecorder);
   private final DagBuilder dagBuilder = new DagBuilder("fa", this.dagProcessor);
+  private final DagBuilderHelper dagBuilderHelper = new DagBuilderHelper(this.dagBuilder);
   private final List<Pair<String, Status>> expectedSequence = new ArrayList<>();
 
 
@@ -97,9 +99,9 @@ public class DagServiceTest {
    */
   @Test
   public void twoNodesSuccess() throws Exception {
-    final NodeBuilder aBuilder = createNodeInTestDag("a");
-    final NodeBuilder bBuilder = createNodeInTestDag("b");
-    bBuilder.addParents(aBuilder);
+    createNodeInTestDag("a");
+    createNodeInTestDag("b");
+    this.dagBuilderHelper.addParentNode("b", "a");
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
     addToExpectedSequence("a", Status.SUCCESS);
@@ -120,10 +122,11 @@ public class DagServiceTest {
    */
   @Test
   public void threeNodesSuccess() throws Exception {
-    final NodeBuilder aBuilder = createNodeInTestDag("a");
-    final NodeBuilder bBuilder = createNodeInTestDag("b");
-    final NodeBuilder cNode = createNodeInTestDag("c");
-    aBuilder.addChildren(bBuilder, cNode);
+    createNodeInTestDag("a");
+    createNodeInTestDag("b");
+    createNodeInTestDag("c");
+    this.dagBuilderHelper.addParentNode("b", "a");
+    this.dagBuilderHelper.addParentNode("c", "a");
 
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
@@ -143,8 +146,8 @@ public class DagServiceTest {
    */
   @Test
   public void oneNodeFailure() throws Exception {
-    final NodeBuilder aBuilder = createNodeInTestDag("a");
-    this.nodesToFail.add(aBuilder.getName());
+    createNodeInTestDag("a");
+    this.nodesToFail.add("a");
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
     addToExpectedSequence("a", Status.FAILURE);
@@ -164,10 +167,10 @@ public class DagServiceTest {
    */
   @Test
   public void twoNodesFailFirst() throws Exception {
-    final NodeBuilder aBuilder = createNodeInTestDag("a");
-    final NodeBuilder bBuilder = createNodeInTestDag("b");
-    bBuilder.addParents(aBuilder);
-    this.nodesToFail.add(aBuilder.getName());
+    createNodeInTestDag("a");
+    createNodeInTestDag("b");
+    this.dagBuilderHelper.addParentNode("b", "a");
+    this.nodesToFail.add("a");
 
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
@@ -191,12 +194,12 @@ public class DagServiceTest {
    */
   @Test
   public void threeNodesFailSecond() throws Exception {
-    final NodeBuilder aBuilder = createNodeInTestDag("a");
-    final NodeBuilder bBuilder = createNodeInTestDag("b");
-    final NodeBuilder cBuilder = createNodeInTestDag("c");
-    aBuilder.addChildren(bBuilder, cBuilder);
-
-    this.nodesToFail.add(bBuilder.getName());
+    createNodeInTestDag("a");
+    createNodeInTestDag("b");
+    createNodeInTestDag("c");
+    this.dagBuilderHelper.addParentNode("b", "a");
+    this.dagBuilderHelper.addParentNode("c", "a");
+    this.nodesToFail.add("b");
 
     addToExpectedSequence("fa", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
@@ -228,28 +231,30 @@ public class DagServiceTest {
     final TestSubDagProcessor testSubDagProcessor = new TestSubDagProcessor
         (this.dagService, this.statusChangeRecorder);
     final DagBuilder subDagBuilder = new DagBuilder("fb", testSubDagProcessor);
-    createNodeInDag("a", subDagBuilder);
-    createNodeInDag("b", subDagBuilder);
+    final DagBuilderHelper subDagBuilderHelper = new DagBuilderHelper(subDagBuilder);
+    subDagBuilderHelper.createNode("a");
+    subDagBuilderHelper.createNode("b");
     final Dag bDag = subDagBuilder.build();
 
     final TestSubDagNodeProcessor testSubDagNodeProcessor = new TestSubDagNodeProcessor
         (this.dagService, this.statusChangeRecorder, bDag, testSubDagProcessor);
-    final NodeBuilder subDagNodeBuilder = this.dagBuilder
-        .createNode("sfb", testSubDagNodeProcessor);
+    final String SUB_DAG_NAME = "sfb";
+    this.dagBuilder.createNode(SUB_DAG_NAME, testSubDagNodeProcessor);
 
-    final NodeBuilder cBuilder = createNodeInTestDag("c");
-    cBuilder.addParents(subDagNodeBuilder);
+    createNodeInTestDag("c");
+
+    this.dagBuilderHelper.addParentNode("c", SUB_DAG_NAME);
     final Dag dag = this.dagBuilder.build();
 
     addToExpectedSequence("fa", Status.RUNNING);
-    addToExpectedSequence("sfb", Status.RUNNING);
+    addToExpectedSequence(SUB_DAG_NAME, Status.RUNNING);
     addToExpectedSequence("fb", Status.RUNNING);
     addToExpectedSequence("a", Status.RUNNING);
     addToExpectedSequence("b", Status.RUNNING);
     addToExpectedSequence("a", Status.SUCCESS);
     addToExpectedSequence("b", Status.SUCCESS);
     addToExpectedSequence("fb", Status.SUCCESS);
-    addToExpectedSequence("sfb", Status.SUCCESS);
+    addToExpectedSequence(SUB_DAG_NAME, Status.SUCCESS);
     addToExpectedSequence("c", Status.RUNNING);
     addToExpectedSequence("c", Status.SUCCESS);
     addToExpectedSequence("fa", Status.SUCCESS);
@@ -258,8 +263,25 @@ public class DagServiceTest {
 
   }
 
-  private void createNodeInDag(final String name, final DagBuilder subDagBuilder) {
-    subDagBuilder.createNode(name, this.nodeProcessor);
+  private class DagBuilderHelper {
+
+    private final DagBuilder dagBuilder;
+
+    DagBuilderHelper(final DagBuilder dagBuilder) {
+      this.dagBuilder = dagBuilder;
+    }
+
+    void createNode(final String name) {
+      this.dagBuilder.createNode(name, DagServiceTest.this.nodeProcessor);
+    }
+
+    /**
+     * Adds parent as the child's parent node.
+     */
+    private void addParentNode(final String childName, final String parentName) {
+      this.dagBuilder.addParentNodes(childName, Collections.singletonList(parentName));
+    }
+
   }
 
   /**
@@ -321,8 +343,8 @@ public class DagServiceTest {
   /**
    * Creates a node and add to the test dag.
    */
-  private NodeBuilder createNodeInTestDag(final String name) {
-    return this.dagBuilder.createNode(name, this.nodeProcessor);
+  private void createNodeInTestDag(final String name) {
+    this.dagBuilderHelper.createNode(name);
   }
 }
 
