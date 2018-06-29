@@ -62,7 +62,7 @@ public class DagBuilderTest {
    * Adds parent as the child's parent node.
    */
   private void addParentNode(final String childName, final String parentName) {
-    this.dagBuilder.addParentNodes(childName, Collections.singletonList(parentName));
+    this.dagBuilder.addParentNode(childName, parentName);
   }
 
   private void assertDagNodes(final Dag dag) {

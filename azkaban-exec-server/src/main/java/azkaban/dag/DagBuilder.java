@@ -87,36 +87,30 @@ public class DagBuilder {
   }
 
   /**
-   * Add parent nodes to a child node. All the names should have been registered with this builder
+   * Add a parent node to a child node. All the names should have been registered with this builder
    * with the {@link DagBuilder#createNode(String, NodeProcessor)} call.
    *
    * @param childNodeName name of the child node
-   * @param parentNodeNames list of parent node names
+   * @param parentNodeName name of the parent node
    */
-  public void addParentNodes(final String childNodeName, final List<String> parentNodeNames) {
+  public void addParentNode(final String childNodeName, final String parentNodeName) {
     checkIsBuilt();
 
-    if (parentNodeNames == null) {
-      return;
-    }
     final Node child = this.nameToNodeMap.get(childNodeName);
     if (child == null) {
       throw new DagException(String.format("Unknown child node (%s). Did you create the node?",
           childNodeName));
     }
-    for (final String parentName : parentNodeNames) {
-      addParentNode(child, parentName);
-    }
-  }
 
-  private void addParentNode(final Node child, final String parentName) {
-    final Node parent = this.nameToNodeMap.get(parentName);
+    final Node parent = this.nameToNodeMap.get(parentNodeName);
     if (parent == null) {
       throw new DagException(
-          String.format("Unknown parent node (%s). Did you create the node?", parentName));
+          String.format("Unknown parent node (%s). Did you create the node?", parentNodeName));
     }
+
     child.addParent(parent);
   }
+
 
   /**
    * Builds the dag.

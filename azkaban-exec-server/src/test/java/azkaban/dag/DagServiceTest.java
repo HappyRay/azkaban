@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import azkaban.utils.ExecutorServiceUtils;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -279,7 +278,7 @@ public class DagServiceTest {
      * Adds parent as the child's parent node.
      */
     private void addParentNode(final String childName, final String parentName) {
-      this.dagBuilder.addParentNodes(childName, Collections.singletonList(parentName));
+      this.dagBuilder.addParentNode(childName, parentName);
     }
 
   }

@@ -100,9 +100,13 @@ public class FlowRunner2Test {
     private void linkNode(final NodeBean node) {
       final String name = node.getName();
       final List<String> parents = node.getDependsOn();
-      this.dagBuilder.addParentNodes(name, parents);
+      if (parents == null) {
+        return;
+      }
+      for (final String parentNodeName : parents) {
+        this.dagBuilder.addParentNode(name, parentNodeName);
+      }
     }
-
   }
 
   private File loadFlowFileFromResource() {
