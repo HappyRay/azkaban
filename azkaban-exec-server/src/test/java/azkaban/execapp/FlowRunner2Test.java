@@ -16,6 +16,8 @@
 
 package azkaban.execapp;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import azkaban.dag.Dag;
 import azkaban.dag.DagBuilder;
 import azkaban.dag.DagProcessor;
@@ -27,6 +29,8 @@ import azkaban.project.NodeBean;
 import azkaban.project.NodeBeanLoader;
 import azkaban.utils.ExecutorServiceUtils;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -41,12 +45,17 @@ public class FlowRunner2Test {
   private final DagService dagService = new DagService(new ExecutorServiceUtils());
   private final CountDownLatch flowFinishedLatch = new CountDownLatch(1);
 
+  // The recorded event sequence.
+  private final List<String> eventSequence = new ArrayList<>();
+
   @Test
+
   public void runSimpleV2Flow() throws Exception {
     final NodeBean flowNode = loadFlowNode();
     final Dag dag = createDag(flowNode);
     this.dagService.startDag(dag);
     this.flowFinishedLatch.await(2, TimeUnit.SECONDS);
+    assertThat(this.eventSequence).isEqualTo(Arrays.asList("n1", "n2"));
     this.dagService.shutdownAndAwaitTermination();
   }
 
@@ -142,6 +151,7 @@ public class FlowRunner2Test {
         case RUNNING:
           System.out.println(String.format("Running with config: %s", this.config));
           FlowRunner2Test.this.dagService.markNodeSuccess(node);
+          FlowRunner2Test.this.eventSequence.add(this.name);
           break;
         default:
           break;

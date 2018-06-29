@@ -1,11 +1,11 @@
 nodes:
-  - name: echo_hello
+  - name: n1
     type: command
     config:
       command: echo "Hello World."
-  - name: second_job
+  - name: n2
     dependsOn:
-      - echo_hello
+      - n1
     type: command
     config:
       command: echo "This is the second job."
