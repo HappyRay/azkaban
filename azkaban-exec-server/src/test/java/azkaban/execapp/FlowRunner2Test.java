@@ -142,6 +142,9 @@ public class FlowRunner2Test {
         case RUNNING:
           System.out.println(String.format("Running with config: %s", this.config));
           FlowRunner2Test.this.dagService.markNodeSuccess(node);
+          break;
+        default:
+          break;
       }
     }
   }
