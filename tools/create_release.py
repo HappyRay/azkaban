@@ -32,8 +32,12 @@ def calculate_new_version(latest_tag):
     return new_version
 
 
-def publish_new_version(new_version):
-    print("publishing new version: " + new_version)
+def publish_new_version(version):
+    print("publishing new version: " + version)
+    create_local_tag_cmd = 'git tag -a {0} -m "Release {0}"'.format(version)
+    run_cmd(create_local_tag_cmd)
+    push_tag_cmd = 'git push origin {0}'.format(version)
+    run_cmd(push_tag_cmd)
 
 
 def should_publish():
