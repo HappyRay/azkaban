@@ -37,6 +37,14 @@ def get_latest_tag():
 
 
 def calculate_new_version(latest_tag):
+    """
+    Calculates the new version.
+
+    Increment the minor version by 1 and set the patch version to 0.
+
+    :param latest_tag: the latest version tag
+    :return: the new version tag
+    """
     major, minor, patch = latest_tag.split('.')
     new_minor = int(minor) + 1
     new_version = "{}.{!s}.0".format(major, new_minor)
