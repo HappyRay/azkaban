@@ -1,0 +1,3 @@
+# direnv files see https://github.com/direnv/direnv
+.envrc
+.direnv/
