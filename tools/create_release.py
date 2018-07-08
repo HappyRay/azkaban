@@ -47,7 +47,7 @@ def calculate_new_version(latest_tag):
     """
     major, minor, patch = latest_tag.split('.')
     new_minor = int(minor) + 1
-    new_version = "{}.{!s}.0".format(major, new_minor)
+    new_version = "{}.{}.0".format(major, new_minor)
     print("New version : {}".format(new_version))
     return new_version
 
