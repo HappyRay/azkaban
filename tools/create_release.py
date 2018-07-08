@@ -6,13 +6,15 @@ Script to publish a new version.
 
 Require a clean tracking master branch and the upstream remote points to the main Azkaban repository.
 """
+
+
 def update_tags():
     """
-    Update the tags in the local branch from the remote.
+    Update the tags in the local branch from the remote upstream.
     """
+    run_cmd('git fetch upstream')
     run_cmd('git checkout master')
-    run_cmd('git pull')
-    pass
+    run_cmd('git merge upstream/master')
 
 
 def run_cmd(cmd):
