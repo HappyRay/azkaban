@@ -1,7 +1,11 @@
 #! /usr/bin/env python3
 import subprocess
 
+"""
+Script to publish a new version.
 
+Require a clean tracking master branch and the upstream remote points to the main Azkaban repository.
+"""
 def update_tags():
     """
     Update the tags in the local branch from the remote.
@@ -12,8 +16,14 @@ def update_tags():
 
 
 def run_cmd(cmd):
+    """
+    Runs a command without capturing the output.
+
+    :param cmd: cmd string
+    :return:
+    """
     print("Running cmd: " + cmd)
-    subprocess.run(cmd, capture_output=False, check=True, text=True, shell=True)
+    subprocess.run(cmd, capture_output=False, check=True, text=False, shell=True)
 
 
 def get_latest_tag():
@@ -36,7 +46,7 @@ def publish_new_version(version):
     print("publishing new version: " + version)
     create_local_tag_cmd = 'git tag -a {0} -m "Release {0}"'.format(version)
     run_cmd(create_local_tag_cmd)
-    push_tag_cmd = 'git push origin {0}'.format(version)
+    push_tag_cmd = 'git push upstream {0}'.format(version)
     run_cmd(push_tag_cmd)
 
 
