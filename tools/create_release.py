@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
-import subprocess
-
 """
 Script to publish a new version.
 
 Require a clean tracking master branch and the upstream remote points to the main Azkaban repository.
 """
+
+import subprocess
 
 
 def update_tags():
