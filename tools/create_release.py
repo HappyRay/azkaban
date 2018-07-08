@@ -6,7 +6,14 @@ def update_tags():
     """
     Update the tags in the local branch from the remote.
     """
+    run_cmd('git checkout master')
+    run_cmd('git pull')
     pass
+
+
+def run_cmd(cmd):
+    print("Running cmd: " + cmd)
+    subprocess.run(cmd, capture_output=False, check=True, text=True, shell=True)
 
 
 def get_latest_tag():
